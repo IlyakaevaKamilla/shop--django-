@@ -1,0 +1,12 @@
+indent-width = 4
+line-length = 79
+target-version = "py311"
+
+exclude = ["*/migrations/*", ".venv"]
+
+[lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]
+
+[format]
+quote-style = "single"
