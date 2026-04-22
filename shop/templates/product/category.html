@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}
+  Товары в категории {{ category.name }}
+{% endblock title %}
+{% block content %}
+  <h1 class="text-center">{{ category.name }}</h1>
+  <form method="get" class="row g-3 align-items-end">
+    <div class="col-md-5">
+     <label for="search" class="form-label">Поиск</label>
+      <input type="text" name="search" id="search" class="form-control" placeholder="Поиск по названию..." value="{{ search_query }}">
+    </div>
+    <div class="col-md-3">
+      <button type="submit" class="btn btn-primary w-100">🔍 Найти</button>
+    </div>
+  </form>
+  {% for product in products %}
+    <article class="mb-5">  
+      <div class="col d-flex justify-content-center">
+        <div class="card" style="width: 40rem;">
+          <div class="card-body">
+            <a href="{{ product.image.url }}" target="_blank">
+              <img class="border-3 rounded img-fluid img-thumbnail mb-2 mx-auto d-block" src="{{ product.image.url }}">
+            </a>
+            <a href="{% url 'product:product_detail' product.id %}">
+              <h5 class="card-title">{{ product.name }}</h5>
+            </a>
+            <h6 class="card-subtitle mb-2 text-muted">
+              <small>
+                {% if not product.is_published %}
+                  <p class="text-danger">Товар снят с продажи админом</p>
+                {% elif not product.category.is_published %}
+                  <p class="text-danger">Выбранная категория снята с продажи админом</p>
+                {% endif %}
+              </small>
+            </h6>
+            <p class="card-text">{{ product.price }} ₽</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  {% endfor %}
+{% endblock content %}
+

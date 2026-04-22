@@ -1,0 +1,23 @@
+from django.urls import path
+
+from . import views
+
+app_name = 'product'
+
+urlpatterns = [
+    path('products/<int:product_id>/',
+         views.ProductDetail.as_view(), name='product_detail'),
+    path('category/<slug:category_slug>/',
+         views.CategoryListView.as_view(), name='category'),
+    path('products/<int:product_id>/review/',
+         views.ReviewCreateView.as_view(), name='add_review'),
+    path('products/<int:product_id>/edit_review/<int:review_id>',
+         views.ReviewUpdateView.as_view(), name='edit_review'),
+    path('products/<int:product_id>/delete_review/<int:review_id>',
+         views.ReviewDeleteView.as_view(), name='delete_review'),
+    path('profile/edit/',
+         views.ProfileUpdateView.as_view(), name='edit_profile'),
+    path('profile/<str:username>/',
+         views.ProfileListView.as_view(), name='profile'),
+    path('', views.IndexView.as_view(), name='index'),
+]

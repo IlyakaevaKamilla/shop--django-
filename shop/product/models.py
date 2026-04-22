@@ -31,6 +31,7 @@ class Category(PublishedModel):
         help_text=('Идентификатор страницы для URL; '
                    'разрешены символы латиницы, цифры, дефис и подчёркивание.')
     )
+    image = models.ImageField('Картинка', upload_to='category_image')
 
     class Meta:
         ordering = ('name',)
@@ -41,12 +42,12 @@ class Category(PublishedModel):
         return self.name
 
 
-class Goods(PublishedModel):
+class Product(PublishedModel):
     """Товары."""
 
     name = models.CharField('Название', max_length=256, unique=True)
     price = models.IntegerField('Цена', validators=[MinValueValidator(0),])
-    description = models.TextField('Описание')
+    description = models.TextField('Описание', null=True, blank=True)
     size = models.CharField('Размер', max_length=256, null=True, blank=True)
     color = models.CharField('Цвет', max_length=256, null=True, blank=True)
     material = models.CharField(
@@ -72,8 +73,8 @@ class Review(models.Model):
 
     text = models.TextField('Отзыв')
     created_at = models.DateTimeField('Создан', auto_now_add=True)
-    goods = models.ForeignKey(
-        Goods, verbose_name='Товар',
+    product = models.ForeignKey(
+        Product, verbose_name='Товар',
         on_delete=models.CASCADE, related_name='reviews'
     )
     author = models.ForeignKey(
@@ -86,20 +87,26 @@ class Review(models.Model):
         ordering = ('-created_at',)
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'product'],
+                name='unique_review'
+            )
+        ]
 
     def __str__(self):
-        return self.text
+        return f'Отзыв от {self.author.username} на {self.product.name}'
 
 
-class GoodsUser(models.Model):
+class ProductUser(models.Model):
     """Абстрактная модель связ товар-пользователь."""
 
     user = models.ForeignKey(
         User, verbose_name='Автор',
         on_delete=models.CASCADE, related_name='%(class)ss'
     )
-    goods = models.ForeignKey(
-        Goods, verbose_name='Товар',
+    product = models.ForeignKey(
+        Product, verbose_name='Товар',
         on_delete=models.CASCADE, related_name='%(class)ss'
     )
 
@@ -107,26 +114,26 @@ class GoodsUser(models.Model):
         abstract = True
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'goods'],
+                fields=['user', 'product'],
                 name='unique_%(class)s'
             )
         ]
 
     def __str__(self):
-        return f'{self.user} - {self.goods}'
+        return f'{self.user} - {self.product}'
 
 
-class Favorite(GoodsUser):
+class Favorite(ProductUser):
     """Избранное."""
 
-    class Meta(GoodsUser.Meta):
+    class Meta(ProductUser.Meta):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
 
 
-class ShoppingCart(GoodsUser):
+class ShoppingCart(ProductUser):
     """Корзина покупок."""
 
-    class Meta(GoodsUser.Meta):
+    class Meta(ProductUser.Meta):
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзины'

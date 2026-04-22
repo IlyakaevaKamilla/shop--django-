@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {% if '/edit_review/' in request.path %}
+    Редактирование отзыва
+  {% else %}
+    Удаление отзыва
+  {% endif %}
+{% endblock %}
+{% block content %}
+  {% if user.is_authenticated %}
+    <div class="col d-flex justify-content-center">
+      <div class="card" style="width: 40rem;">
+        <div class="card-header">
+          {% if '/edit_review/' in request.path %}
+            Редактирование отзыва
+          {% else %}
+            Удаление отзыва
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+            {% if '/edit_review/' in request.path %}
+              {% bootstrap_form form %}
+              {% bootstrap_button button_type="submit" content="Сохранить изменения" %}
+            {% elif '/delete_review/' in request.path %}
+              <p>Вы уверены, что хотите удалить этот отзыв?</p>
+              <strong>Товар:</strong> {{ review.product.name }}<br>
+              <strong>Тескт отзыва:</strong><br>{{ review.text|linebreaksbr }}
+              
+              {% bootstrap_button button_type="submit" content="Да, удалить" button_class="btn-danger" %}
+              <a href="{% url 'product:product_detail' review.product.id %}" class="btn btn-secondary">Отмена</a>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}

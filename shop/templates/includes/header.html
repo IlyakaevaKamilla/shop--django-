@@ -1,0 +1,32 @@
+{% load static %}
+<header>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'product:index' %}">
+        <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
+        Товары для дома
+      </a>
+      {% with request.resolver_match.view_name as view_name %}
+        <ul class="nav  nav-pills">
+          {% if user.is_authenticated %}
+            <div class="btn-group" role="group" aria-label="Basic outlined example">
+              {% comment %} <a href="{% url 'product:favorite' %}" class="btn btn-primary btn-lg me-2">Избранное</a>
+              <a href="{% url 'product:shopping_cart'%}" class="btn btn-outline-primary btn-lg">Корзина</a> {% endcomment %}
+              <a href="{% url 'product:profile' user.username %}" class="btn btn-outline-primary btn-lg">{{ user.username }}</a>
+              <form method="post" action="{% url 'logout' %}" class="d-inline me-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-primary btn-lg">Выйти</button>
+              </form>
+            </div>
+          {% else %}
+            <div class="btn-group" role="group" aria-label="Basic outlined example">
+              <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-2">Войти</a>
+              <a href="{% url 'registration' %}" class="btn btn-outline-primary btn-lg">Регистрация</a>
+            </div>
+          </div>
+          {% endif %}
+        </ul>
+      {% endwith %}
+    </div>
+  </nav>
+</header>

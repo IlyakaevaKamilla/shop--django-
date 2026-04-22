@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}
+  Категории
+{% endblock title %}
+{% block content %}
+  <div>
+    {% for category in categories %}
+      <a href="{% url 'product:category' category.slug %}">
+        {{ category.name }}
+        <img src="{{ category.image.url }}" alt="{{ category.name }}" width="200">
+      </a>
+    {% endfor %}
+  </div>
+{% endblock content %}

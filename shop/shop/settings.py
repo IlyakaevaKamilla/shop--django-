@@ -1,5 +1,7 @@
 from pathlib import Path
 
+from django.contrib.messages import constants as messages
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -17,8 +19,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'goods.apps.GoodsConfig',
+    'product.apps.ProductConfig',
     'pages.apps.PagesConfig',
+    'django_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -95,3 +98,16 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = 'product:index'
+
+LOGIN_URL = 'login'
+
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'secondary',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning',
+    messages.ERROR: 'danger',
+}

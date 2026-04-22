@@ -1,0 +1,27 @@
+<div class="media">
+  <div class="media-body">
+    <h5 class="mt-0">
+      @{{ review.author.username }}
+    </h5>
+    {% if '/profile/' in request.path %}
+      <small class="text-muted">
+        Товар: <a href="{% url 'product:product_detail' review.product.id %}">{{ review.product.name }}</a>
+      </small>
+    {% endif %}
+    <br>
+    <small class="text-muted">Оставлен: {{ review.created_at|date:"d.m.Y H:i" }}</small>
+    <br><br>
+    {{ review.text|linebreaksbr }}
+    
+    {% if user == review.author %}
+      <div class="mt-3">
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'product:edit_review' review.product.id review.id %}" role="button">
+          ✏️ Отредактировать
+        </a>
+        <a class="btn btn-sm btn-outline-danger" href="{% url 'product:delete_review' review.product.id review.id %}" role="button">
+          🗑️ Удалить
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
