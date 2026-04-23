@@ -1,62 +1,70 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}
-    {{ product.name }}
+  {{ product.name }}
 {% endblock %}
+
 {% block content %}
-  <div class="col d-flex justify-content-center">
-    <div class="card" style="width: 40rem;">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-          <a href="{{ product.image.url }}" target="_blank">
-            <img class="border-3 rounded img-fluid img-thumbnail mb-2 mx-auto d-block" src="{{ product.image.url }}">
-          </a>
-        </div>
-        <h6 class="card-subtitle mb-2 text-muted">
-        </h6>
-        <p class="card-text">{{ product.name }}</p>
-        <p class="card-text">{{ product.price }} ₽</p>
-        {% if product.description %}
-          <p class="card-text">Описание: {{ product.description }}</p>
-        {% endif %}
-        {% if product.size %}
-          <p class="card-text">Размер: {{ product.size}}</p>
-        {% endif %}
-        {% if product.color %}
-          <p class="card-text">Цвет: {{ product.color}}</p>
-        {% endif %}
-        {% if product.material %}
-          <p class="card-text">Материал: {{ product.material}}</p>
-        {% endif %}
-      </div>
-      <div class="card-footer">
-        {% if user.is_authenticated %}
-          {% if user_review %}
-            <strong>Вы уже оставили отзыв на этот товар:</strong>
-            <div>
-              {{ user_review.text|linebreaksbr }}
-              <div>
-                <a class="btn btn-sm btn-outline-secondary" href="{% url 'product:edit_review' product.id user_review.id %}" role="button">
-                  Редактировать отзыв
-                </a>
-                <a class="btn btn-sm btn-outline-danger" href="{% url 'product:delete_review' product.id user_review.id %}" role="button">
-                  Удалить отзыв
-                </a>
-              </div>
-            </div>
-          {% else %}
-            {% include "includes/review_form.html" %}
-          {% endif %}
-        {% else %}
-            <p><a href="{% url 'login' %}">Войдите</a>, чтобы оставить отзыв</p>
-        {% endif %}
-        {% for review in reviews %}
-          {% if not user.is_authenticated or review.id != user_review.id %}
-            {% include "includes/review_card.html" with review=review %}
-          {% endif %}
-        {% empty %}
-          <p class="text-muted">Пока нет отзывов. Будьте первым!</p>
-        {% endfor %}
+<div class="container mt-4">
+  <div class="row">
+    <!-- Левая колонка: картинка -->
+    <div class="col-md-6 mb-4">
+      <img src="{{ product.image.url }}" class="img-fluid rounded shadow-sm" alt="{{ product.name }}" style="max-height: 500px; width: 100%; object-fit: contain;">
+    </div>
+
+    <!-- Правая колонка: информация о товаре -->
+    <div class="col-md-6">
+      <h1 style="color: #dc3545;">{{ product.name }}</h1>
+      <h3 class="mt-3" style="color: #dc3545;">{{ product.price }} ₽</h3>
+
+      {% if product.description %}
+        <p class="mt-3"><strong>Описание:</strong> {{ product.description }}</p>
+      {% endif %}
+      {% if product.size %}
+        <p><strong>Размер:</strong> {{ product.size }}</p>
+      {% endif %}
+      {% if product.color %}
+        <p><strong>Цвет:</strong> {{ product.color }}</p>
+      {% endif %}
+      {% if product.material %}
+        <p><strong>Материал:</strong> {{ product.material }}</p>
+      {% endif %}
+
+      <div class="mt-4 d-flex gap-2">
+        <button class="btn btn-danger favorite-btn" data-id="{{ product.id }}">
+          ♡ В избранное
+        </button>
+        <button class="btn btn-success cart-btn" data-id="{{ product.id }}">
+          🛒 В корзину
+        </button>
       </div>
     </div>
   </div>
+  <hr class="my-5">
+  <div class="row mt-4">
+    <div class="col-md-8 mx-auto">
+      <h3 class="text-center mb-4" style="color: #dc3545;">Отзывы</h3>
+      {% if user.is_authenticated and not user_review %}
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">Оставить отзыв</h5>
+            <form method="post" action="{% url 'product:add_review' product.id %}">
+              {% csrf_token %}
+              <div class="mb-3">
+                <textarea name="text" class="form-control" rows="4" placeholder="Ваш отзыв..."></textarea>
+              </div>
+              <button type="submit" class="btn btn-danger">Отправить отзыв</button>
+            </form>
+          </div>
+        </div>
+      {% endif %}
+      {% for review in reviews %}
+        {% include "includes/review_card.html" with review=review %}
+      {% empty %}
+        <p class="text-center text-muted">Пока нет отзывов. Будьте первым!</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
 {% endblock %}

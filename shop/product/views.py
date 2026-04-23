@@ -130,8 +130,8 @@ class ReviewCreateView(AuthRequiredMixin, CreateView):
             messages.success(self.request, 'Спасибо за ваш отзыв!')
         except IntegrityError:
             messages.error(self.request, 'Вы уже оставили отзыв на этот товар.')
-            return redirect('product:product_detail', pk=self.product.id)
-        return redirect('product:product_detail', pk=self.product.id)
+            return redirect('product:product_detail', product_id=self.product.id)
+        return redirect('product:product_detail', product_id=self.product.id)
 
     # def get_success_url(self):
     #     return reverse(

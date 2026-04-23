@@ -1,21 +1,101 @@
 {% extends "base.html" %}
 {% load django_bootstrap5 %}
+
 {% block title %}
   Редактирование профиля
 {% endblock %}
+
 {% block content %}
   <div class="col d-flex justify-content-center">
-    <div class="card" style="width: 40rem;">
-      <div class="card-header">
-        Редактирование профиля - {{ request.user.username }}
+    <div class="card" style="width: 40rem; background-color: #2a2a2a;">
+      <div class="card-header" style="background-color: #dc3545; color: #1a1a1a; font-weight: bold;">
+        <i class="fas fa-user-edit me-2"></i>Редактирование профиля - {{ request.user.username }}
       </div>
       <div class="card-body">
         <form method="post">
           {% csrf_token %}
-          {% bootstrap_form form %}
-          {% bootstrap_button button_type="submit" content="Отправить" %}
+          <!-- Поля формы -->
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label" style="color: #dc3545; font-weight: 500;">
+                {{ field.label }}
+                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+              </label>
+              {% bootstrap_field field show_label=False %}
+              {% if field.help_text %}
+                <small class="form-text text-muted mt-1" style="color: #a0a0a0 !important; font-size: 0.8rem;">
+                  <i class="fas fa-info-circle me-1" style="color: #dc3545;"></i>
+                  {{ field.help_text }}
+                </small>
+              {% endif %}
+            </div>
+          {% endfor %}
+          
+          <div class="d-flex gap-2 mt-4">
+            {% bootstrap_button "Сохранить изменения" button_type="submit" button_class="btn-danger" %}
+            <a href="{% url 'product:profile' request.user.username %}" class="btn btn-outline-danger">
+              <i class="fas fa-times me-1"></i>Отмена
+            </a>
+          </div>
         </form>
+        
+        <hr class="my-4" style="border-color: #3a3a3a;">
+        
+        <div class="text-center">
+          <p class="mb-2" style="color: #a0a0a0;">Хотите изменить пароль?</p>
+          <a href="{% url 'password_change' %}" class="btn btn-outline-danger btn-sm">
+            <i class="fas fa-key me-1"></i>Изменить пароль
+          </a>
+        </div>
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block extra_css %}
+  <style>
+    /* Стили для полей формы */
+    input, select, textarea {
+      background-color: #1a1a1a !important;
+      border: 1px solid #3a3a3a !important;
+      color: #e0e0e0 !important;
+      padding: 8px 12px !important;
+      border-radius: 6px !important;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      border-color: #dc3545 !important;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+      outline: none !important;
+    }
+    
+    /* Убираем стандартную обводку Bootstrap */
+    .is-valid, .is-invalid {
+      background-image: none !important;
+    }
+    
+    .alert-secondary {
+      background-color: #1a1a1a;
+      border-color: #3a3a3a;
+    }
+    
+    .btn-danger {
+      background-color: #dc3545;
+      border: none;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+    
+    .btn-outline-danger {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+    
+    .btn-outline-danger:hover {
+      background-color: #dc3545;
+      color: #1a1a1a;
+    }
+  </style>
 {% endblock %}

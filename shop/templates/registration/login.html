@@ -3,32 +3,40 @@
 {% block content %}
   {% if next %}
     {% if user.is_authenticated %}
-      <p class="text-center">
+      <div class="alert alert-danger text-center">
         У вашего аккаунта нет доступа к этой странице.
         Чтобы продолжить, войдите в систему с аккаунтом,
         у которого есть доступ.
-      </p>
+      </div>
     {% else %}
-      <p class="text-center">
+      <div class="alert alert-info text-center">
         Пожалуйста, войдите в систему,
         чтобы просматривать эту страницу.
-      </p>
+      </div>
     {% endif %}
   {% endif %}
-  <div class="col d-flex justify-content-center">
-    <div class="card" style="width: 40rem;">
-      <div class="card-header">
-        Войти в систему
+   <div class="col d-flex justify-content-center">
+    <div class="card" style="width: 40rem; background-color: #2a2a2a;">
+      <div class="card-header" style="background-color: #dc3545; color: #1a1a1a; font-weight: bold;">
+        <i class="fas fa-sign-in-alt me-2"></i>Войти в систему
       </div>
       <div class="card-body">
         <form method="post" action="{% url 'login' %}">
           {% csrf_token %}
           {% bootstrap_form form %}
           <input type="hidden" name="next" value="{{ next }}">
-          {% bootstrap_button button_type="submit" content="Войти" %}
+          <div class="d-grid gap-2">
+            {% bootstrap_button button_type="submit" content="Войти" button_class="btn-danger" %}
+          </div>
         </form>
-        <div>
-          <a href="{% url 'password_reset' %}">Забыли пароль?</a>
+        <div class="text-center mt-3">
+          <a href="{% url 'password_reset' %}" style="color: #dc3545;">
+            <i class="fas fa-key me-1"></i>Забыли пароль?
+          </a>
+          <span class="mx-2 text-muted">|</span>
+          <a href="{% url 'registration' %}" style="color: #dc3545;">
+            <i class="fas fa-user-plus me-1"></i>Регистрация
+          </a>
         </div>
       </div>
     </div>

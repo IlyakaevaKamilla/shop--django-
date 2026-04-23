@@ -1,14 +1,41 @@
 {% extends "base.html" %}
+{% load static %}
+
 {% block title %}
-  Категории
-{% endblock title %}
+  Главная страница
+{% endblock %}
+
 {% block content %}
-  <div>
+<div class="container mt-4">
+  <h1 class="text-center mb-5" style="color: #dc3545;">
+    Добро пожаловать в наш магазин
+  </h1>
+
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
     {% for category in categories %}
-      <a href="{% url 'product:category' category.slug %}">
-        {{ category.name }}
-        <img src="{{ category.image.url }}" alt="{{ category.name }}" width="200">
-      </a>
+      <div class="col">
+        <div class="card h-100 shadow-sm text-center">
+          <a href="{% url 'product:category' category.slug %}">
+            {% if category.image %}
+              <img src="{{ category.image.url }}" class="card-img-top img-fluid" alt="{{ category.name }}" style="height: 250px; object-fit: cover; cursor: pointer;">
+            {% else %}
+              <div class="bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                <span class="text-muted">Нет изображения</span>
+              </div>
+            {% endif %}
+          </a>
+          <div class="card-body">
+            <a href="{% url 'product:category' category.slug %}" class="text-decoration-none" style="color: #dc3545;">
+              <h5 class="card-title">{{ category.name }}</h5>
+            </a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12 text-center">
+        <p>Категории пока не добавлены</p>
+      </div>
     {% endfor %}
   </div>
-{% endblock content %}
+</div>
+{% endblock %}

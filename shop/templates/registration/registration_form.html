@@ -1,18 +1,148 @@
 {% extends "base.html" %}
-{% load django_bootstrap5 %}
+
+{% block title %}
+  Регистрация
+{% endblock %}
+
 {% block content %}
   <div class="col d-flex justify-content-center">
-    <div class="card" style="width: 40rem;">
-      <div class="card-header">
-        Регистрация пользователя
+    <div class="card" style="width: 40rem; background-color: #2a2a2a; border: none;">
+      <div class="card-header border-0" style="background-color: #dc3545; color: #1a1a1a; font-weight: bold; font-size: 1.25rem;">
+        <i class="fas fa-user-plus me-2"></i>Регистрация нового пользователя
       </div>
       <div class="card-body">
-        <form method="post">
+        <form method="post" action="{% url 'registration' %}">
           {% csrf_token %}
-          {% bootstrap_form form %}
-          {% bootstrap_button button_type="submit" content="Создать" %}
+          <div class="form-group mb-4">
+            <label class="form-label fw-bold mb-2" style="color: #dc3545;">
+              <i class="fas fa-user me-1"></i>Имя пользователя <span class="text-danger">*</span>
+            </label>
+            <input type="text" 
+                   name="username" 
+                   class="form-control" 
+                   placeholder="Введите имя пользователя"
+                   value="{{ form.username.value|default:'' }}"
+                   required>
+            <small class="text-muted d-block mt-2" style="color: #a0a0a0 !important; font-size: 0.8rem;">
+              <i class="fas fa-info-circle me-1" style="color: #dc3545;"></i>
+              Обязательное поле. Не более 150 символов. Только буквы, цифры и символы @/./+/-/_.
+            </small>
+            {% if form.username.errors %}
+              <div class="text-danger mt-2 small">
+                {% for error in form.username.errors %}
+                  <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label fw-bold mb-2" style="color: #dc3545;">
+              <i class="fas fa-lock me-1"></i>Пароль <span class="text-danger">*</span>
+            </label>
+            <input type="password" 
+                   name="password1" 
+                   class="form-control" 
+                   placeholder="Придумайте пароль"
+                   required>
+            <small class="text-muted d-block mt-2" style="color: #a0a0a0 !important; font-size: 0.8rem;">
+              <i class="fas fa-shield-alt me-1" style="color: #dc3545;"></i>
+              <span>Пароль должен соответствовать требованиям:</span>
+              <ul class="mt-1 mb-0" style="padding-left: 1.2rem;">
+                <li>не быть слишком похож на личную информацию</li>
+                <li>содержать минимум 8 символов</li>
+                <li>не быть слишком простым</li>
+                <li>не состоять только из цифр</li>
+              </ul>
+            </small>
+            {% if form.password1.errors %}
+              <div class="text-danger mt-2 small">
+                {% for error in form.password1.errors %}
+                  <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="form-group mb-4">
+            <label class="form-label fw-bold mb-2" style="color: #dc3545;">
+              <i class="fas fa-check-circle me-1"></i>Подтверждение пароля <span class="text-danger">*</span>
+            </label>
+            <input type="password" 
+                   name="password2" 
+                   class="form-control" 
+                   placeholder="Повторите пароль"
+                   required>
+            <small class="text-muted d-block mt-2" style="color: #a0a0a0 !important; font-size: 0.8rem;">
+              <i class="fas fa-redo-alt me-1" style="color: #dc3545;"></i>
+              Для подтверждения введите пароль ещё раз
+            </small>
+            {% if form.password2.errors %}
+              <div class="text-danger mt-2 small">
+                {% for error in form.password2.errors %}
+                  <i class="fas fa-exclamation-circle me-1"></i>{{ error }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <button type="submit" class="btn btn-danger w-100 py-2 fw-bold">
+            <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+          </button>
         </form>
+        <div class="text-center mt-4 pt-3">
+          <p class="mb-0 text-muted" style="color: #a0a0a0 !important;">Уже есть аккаунт?</p>
+          <a href="{% url 'login' %}" class="text-decoration-none mt-1 d-inline-block" style="color: #dc3545;">
+            <i class="fas fa-sign-in-alt me-1"></i>Войдите в систему
+          </a>
+        </div>
       </div>
     </div>
   </div>
+{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .form-control {
+      background-color: #1a1a1a;
+      border: 1px solid #3a3a3a;
+      color: #e0e0e0;
+      padding: 10px 12px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+      background-color: #1a1a1a;
+      border-color: #dc3545;
+      color: #e0e0e0;
+      box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+      outline: none;
+    }
+    
+    .form-control::placeholder {
+      color: #6c757d;
+    }
+    
+    ul {
+      list-style-type: disc;
+    }
+    
+    ul li {
+      margin: 4px 0;
+    }
+    
+    .card {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    
+    .btn-danger {
+      background-color: #dc3545;
+      border: none;
+      transition: all 0.3s;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c82333;
+      transform: translateY(-1px);
+    }
+  </style>
 {% endblock %}
