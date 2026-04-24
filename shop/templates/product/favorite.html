@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}
+    Моё избранное
+{% endblock %}
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="text-center mb-4" style="color: #dc3545;">
+      <i class="fas fa-heart me-2"></i>Избранное
+    </h1>
+    {% if favorites %}
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for favorite in favorites %}
+          {% include "includes/product_detail.html" with product=favorite.product show_delete_button=True delete_url="product:toggle_favorite" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="text-center py-5">
+        <i class="fas fa-heart" style="font-size: 64px; color: #dc3545; opacity: 0.5;"></i>
+        <p class="mt-3">У вас пока нет избранных товаров</p>
+        <a href="{% url 'product:index' %}" class="btn btn-outline-danger mt-2">Перейти к покупкам</a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

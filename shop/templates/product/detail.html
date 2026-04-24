@@ -30,14 +30,8 @@
       {% if product.material %}
         <p><strong>Материал:</strong> {{ product.material }}</p>
       {% endif %}
-
       <div class="mt-4 d-flex gap-2">
-        <button class="btn btn-danger favorite-btn" data-id="{{ product.id }}">
-          ♡ В избранное
-        </button>
-        <button class="btn btn-success cart-btn" data-id="{{ product.id }}">
-          🛒 В корзину
-        </button>
+        {% include "includes/product_buttons.html" %}
       </div>
     </div>
   </div>

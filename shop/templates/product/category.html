@@ -17,33 +17,9 @@
       </form>
     </div>
   </div>
-
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for product in products %}
-      <div class="col">
-        <div class="card h-100 shadow-sm">
-          <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-          <div class="card-body">
-            <h5 class="card-title">{{ product.name }}</h5>
-            <p class="card-text fw-bold" style="color: #dc3545;">
-              {{ product.price }} ₽
-            </p>
-            <div class="d-flex justify-content-between mt-3">
-              <a href="{% url 'product:product_detail' product.id %}" class="btn btn-sm btn-outline-secondary">
-                Подробнее
-              </a>
-              <div>
-                <button class="btn btn-sm btn-outline-danger favorite-btn" data-id="{{ product.id }}">
-                  ♡
-                </button>
-                <button class="btn btn-sm btn-outline-success cart-btn" data-id="{{ product.id }}">
-                  🛒
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {% include "includes/product_detail.html" %}
     {% empty %}
       <div class="col-12 text-center">
         <p>Товаров в этой категории пока нет</p>

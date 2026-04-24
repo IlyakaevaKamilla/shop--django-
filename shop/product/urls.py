@@ -19,5 +19,12 @@ urlpatterns = [
          views.ProfileUpdateView.as_view(), name='edit_profile'),
     path('profile/<str:username>/',
          views.ProfileListView.as_view(), name='profile'),
+    path('toggle-favorite/<int:product_id>/',
+         views.ToggleFavoriteView.as_view(), name='toggle_favorite'),
+    path('toggle-cart/<int:product_id>/',
+         views.ToggleShoppingCartView.as_view(), name='toggle_shopping_cart'),
+    path('favorites/', views.FavoriteListView.as_view(), name='favoriites'),
+    path('shopping-cart/',
+         views.ShoppingCartListView.as_view(), name='shopping_cart'),
     path('', views.IndexView.as_view(), name='index'),
 ]

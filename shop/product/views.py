@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
-    CreateView, DeleteView, DetailView, ListView, UpdateView
+    CreateView, DeleteView, DetailView, ListView, UpdateView, View
 )
 
 from .forms import ReviewForm, ProfileForm
@@ -41,6 +41,46 @@ class ReviewCRUDMixin:
         )
 
 
+class ShoppingCartFavoriteMixin:
+    """Миксин для добавления/удаления избранного/коризины."""
+
+    def post(self, request, product_id, model=None):
+        product = get_object_or_404(Product, id=product_id)
+        existing_item = model.objects.filter(
+            user=request.user, product=product)
+        if existing_item.exists():
+            existing_item.delete()
+        else:
+            model.objects.create(user=request.user, product=product)
+        return redirect(request.META.get(
+            'HTTP_REFERER', redirect(
+                'product:product_detail', product_id=product_id
+            )
+        ))
+
+
+class ShoppingCartFavoriteListMixin:
+    """Миксин для отображения избранного/корзины пользователя."""
+
+    def get_queryset(self, model=None):
+        return model.objects.filter(
+            user=self.request.user,
+        ).select_related('product')
+
+
+class FavoriteContextMixin:
+    """Миксин для добавления избранного в контекст."""
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            favorites_ids = Favorite.objects.filter(
+                user=self.request.user,
+            ).values_list('product_id', flat=True)
+            context['favorite_ids'] = set(favorites_ids)
+        return context
+
+
 class IndexView(ListView):
     """Главная станица."""
 
@@ -52,7 +92,7 @@ class IndexView(ListView):
         return Category.objects.filter(is_published=True)
 
 
-class CategoryListView(ListView):
+class CategoryListView(FavoriteContextMixin, ListView):
     """Представление товаров этой категории."""
 
     model = Product
@@ -84,7 +124,7 @@ class CategoryListView(ListView):
         return super().get_context_data(**kwargs, category=self._category)
 
 
-class ProductDetail(DeleteView):
+class ProductDetail(FavoriteContextMixin, DetailView):
     """Представление отдельного товара."""
 
     model = Product
@@ -96,7 +136,8 @@ class ProductDetail(DeleteView):
         product = self.get_object()
         context['reviews'] = product.reviews.all().select_related('author')
         if self.request.user.is_authenticated:
-            user_review = product.reviews.filter(author=self.request.user).first()
+            user_review = product.reviews.filter(
+                author=self.request.user).first()
             context['user_review'] = user_review
             context['has_user_reviewed'] = user_review is not None
         else:
@@ -129,14 +170,10 @@ class ReviewCreateView(AuthRequiredMixin, CreateView):
             form.save()
             messages.success(self.request, 'Спасибо за ваш отзыв!')
         except IntegrityError:
-            messages.error(self.request, 'Вы уже оставили отзыв на этот товар.')
+            messages.error(
+                self.request, 'Вы уже оставили отзыв на этот товар.')
             return redirect('product:product_detail', product_id=self.product.id)
         return redirect('product:product_detail', product_id=self.product.id)
-
-    # def get_success_url(self):
-    #     return reverse(
-    #         'product:product_detail', args=[self.kwargs['product_id']]
-    #     )
 
 
 class ReviewUpdateView(ReviewCRUDMixin, OnlyAuthorMixin, UpdateView):
@@ -187,3 +224,50 @@ class ProfileUpdateView(AuthRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('product:profile', args=[self.request.user.username])
+
+
+class ToggleFavoriteView(ShoppingCartFavoriteMixin, View):
+    """Представления для удаления/добавления в избранное."""
+
+    def post(self, request, product_id):
+        return super().post(request, product_id, Favorite)
+
+
+class ToggleShoppingCartView(ShoppingCartFavoriteMixin, View):
+    """Представления для удаления/добавления в корзину."""
+
+    def post(self, request, product_id):
+        return super().post(request, product_id, ShoppingCart)
+
+
+class FavoriteListView(
+    AuthRequiredMixin, ShoppingCartFavoriteListMixin,
+    FavoriteContextMixin, ListView
+):
+    """Представление для всех избранных товаров пользователя."""
+
+    model = Favorite
+    template_name = 'product/favorite.html'
+    context_object_name = 'favorites'
+
+    def get_queryset(self):
+        return super().get_queryset(Favorite)
+
+
+class ShoppingCartListView(AuthRequiredMixin, ShoppingCartFavoriteListMixin, ListView):
+    """Представление для всех товаров добавленных в корзину пользователем."""
+
+    model = ShoppingCart
+    template_name = 'product/shopping_cart.html'
+    context_object_name = 'shopping_carts'
+
+    def get_queryset(self):
+        return super().get_queryset(ShoppingCart)
+
+    def get_context_data(self, **kwargs):
+        cart_items = self.get_queryset()
+        return super().get_context_data(
+            **kwargs,
+            total_price=sum(item.product.price for item in cart_items),
+            cart_ids=cart_items.values_list('product_id', flat=True)
+        )

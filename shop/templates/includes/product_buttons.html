@@ -1,0 +1,29 @@
+{% load static %}
+<div class="product-buttons">
+    <!-- КНОПКА ИЗБРАННОГО -->
+    <form method="post" action="{% url 'product:toggle_favorite' product.id %}" class="d-inline">
+        {% csrf_token %}
+        {% if product.id in favorite_ids %}
+            <button type="submit" class="btn btn-danger" title="Удалить из избранного">
+                <i class="fas fa-heart me-1"></i>
+            </button>
+        {% else %}
+            <button type="submit" class="btn btn-outline-danger" title="Добавить в избранное">
+                <i class="fas fa-heart me-1"></i>
+            </button>
+        {% endif %}
+    </form>
+    <!-- КНОПКА КОРЗИНЫ -->
+    <form method="post" action="{% url 'product:toggle_shopping_cart' product.id %}" class="d-inline">
+        {% csrf_token %}
+        {% if product.id in cart_ids %}
+            <button type="submit" class="btn btn-success" title="Удалить из корзины">
+                <i class="fas fa-shopping-cart me-1"></i> В корзине
+            </button>
+        {% else %}
+            <button type="submit" class="btn btn-outline-success" title="Добавить в корзину">
+                <i class="fas fa-shopping-cart me-1"></i> Корзина
+            </button>
+        {% endif %}
+    </form>
+</div>
