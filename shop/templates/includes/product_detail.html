@@ -6,7 +6,12 @@
     </a>
     <div class="card-body">
       <h5 class="card-title">{{ product.name }}</h5>
-      <p class="card-text fw-bold" style="color: #dc3545;">{{ product.price }} ₽</p>
+      {% if product.is_sale %}
+        <strike>{{ product.price }} ₽</strike>
+        <p class="card-text fw-bold" style="color: #dc3545;">{{ product.sale_price }} ₽</p>
+      {% else %}
+        <p class="card-text fw-bold" style="color: #dc3545;">{{ product.price }} ₽</p>
+      {% endif %}
       <div class="d-flex justify-content-between mt-3">
         {% include "includes/product_buttons.html" with product=product %}
       </div>

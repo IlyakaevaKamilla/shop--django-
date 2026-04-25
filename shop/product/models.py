@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class PublishedModel(models.Model):
@@ -54,6 +54,11 @@ class Product(PublishedModel):
         'Материал', max_length=256, null=True, blank=True
     )
     image = models.ImageField('Картинка', upload_to='good_image')
+    is_sale = models.BooleanField('На распродаже', default=False)
+    sale_price = models.IntegerField(
+        'Цена со скидкой', validators=[MinValueValidator(0)],
+        null=True, blank=True
+    )
     category = models.ForeignKey(
         Category, verbose_name='Категория',
         on_delete=models.CASCADE, related_name='category'

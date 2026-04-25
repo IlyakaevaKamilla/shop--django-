@@ -73,8 +73,8 @@ class FavoriteCartContextMixin:
 
     def get_items(self, model):
         return model.objects.filter(
-                user=self.request.user,
-            ).values_list('product_id', flat=True)
+            user=self.request.user,
+        ).values_list('product_id', flat=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -273,5 +273,9 @@ class ShoppingCartListView(AuthRequiredMixin, ShoppingCartFavoriteListMixin, Fav
         cart_items = self.get_queryset()
         return super().get_context_data(
             **kwargs,
-            total_price=sum(item.product.price for item in cart_items)
+            total_price=sum(
+                item.product.price
+                if not item.product.is_sale else item.product.sale_price
+                for item in cart_items
+            )
         )
