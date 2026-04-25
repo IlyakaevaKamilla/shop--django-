@@ -8,7 +8,7 @@
       <i class="fas fa-heart me-2"></i>Избранное
     </h1>
     {% if favorites %}
-      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-3">
         {% for favorite in favorites %}
           {% include "includes/product_detail.html" with product=favorite.product show_delete_button=True delete_url="product:toggle_favorite" %}
         {% endfor %}

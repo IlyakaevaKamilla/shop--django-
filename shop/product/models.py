@@ -139,6 +139,8 @@ class Favorite(ProductUser):
 class ShoppingCart(ProductUser):
     """Корзина покупок."""
 
+    is_selected = models.BooleanField('Купить', default=True)
+
     class Meta(ProductUser.Meta):
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзины'

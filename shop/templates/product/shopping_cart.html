@@ -5,57 +5,178 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container mt-4">
+<div class="container mt-4">
     <h1 class="text-center mb-4" style="color: #dc3545;">
-      <i class="fas fa-shopping-cart me-2"></i>Корзина
+        <i class="fas fa-shopping-cart me-2"></i>Корзина
     </h1>
+    
     {% if shopping_carts %}
-      <div class="text-center mb-4">
-        <div style="display: inline-block; background: linear-gradient(135deg, #dc3545, #c82333); color: white; padding: 10px 30px; border-radius: 50px; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);">
-          <i class="fas fa-shopping-bag me-2"></i>
-          <strong>В корзине:</strong> {{ shopping_carts|length }} товар(ов)
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-8 mb-4 mb-lg-0">
-          <div class="row row-cols-1 row-cols-md-2 g-4">
-            {% for item in shopping_carts %}
-              {% include "includes/product_detail.html" with product=item.product show_delete_button=True delete_url="product:toggle_shopping_cart" %}
-            {% endfor %}
-          </div>
-        </div>
-        <div class="col-lg-4">
-          <div class="card text-center shadow-sm" style="background-color: #ffffff; border: none; border-radius: 20px; position: sticky; top: 20px;">
-            <div class="card-body p-4">
-              <div class="mb-3">
-                  <span style="font-size: 14px; color: #6c757d; letter-spacing: 2px;">ИТОГО</span>
-                  <h2 style="color: #dc3545; margin: 10px 0 5px; font-weight: bold;">{{ total_price }} ₽</h2>
-                  <small class="text-muted">включая все налоги</small>
-              </div>
-              <div class="border-top pt-3 mb-3" style="border-color: #e9ecef;">
-                <div class="d-flex justify-content-between mb-2">
-                  <span>Товаров:</span>
-                  <strong>{{ shopping_carts|length }}</strong>
-                </div>
-              </div>
-              <button class="btn btn-danger w-100 py-3" disabled style="font-weight: bold; font-size: 1rem; border-radius: 50px; background: linear-gradient(135deg, #dc3545, #c82333); border: none;">
-                <i class="fas fa-credit-card me-2"></i>Оформить заказ
-              </button>
-              <small class="text-muted d-block text-center mt-3">
-                <i class="fas fa-lock me-1"></i>Безопасная оплата
-              </small>
+        <form method="post" action="{% url 'product:update_selection' %}">
+            {% csrf_token %}
+            
+            <!-- Счётчик выбранных товаров -->
+            <div class="text-center mb-4">
+                <span style="background-color: #dc3545; color: white; padding: 8px 20px; border-radius: 30px; font-weight: bold;">
+                    <i class="fas fa-check-circle me-2"></i>Выбрано для покупки: {{ selected_count }} из {{ shopping_carts|length }}
+                </span>
             </div>
-          </div>
+            
+            <div class="row">
+                <!-- Список товаров в корзине -->
+                <div class="col-lg-8 mb-4 mb-lg-0">
+                    {% for item in shopping_carts %}
+                        <div class="card mb-3 shadow-sm" style="background-color: #ffffff; border: 1px solid #e9ecef; border-radius: 15px; overflow: hidden;">
+                            <div class="row g-0">
+                                <!-- Картинка -->
+                                <div class="col-md-3">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" 
+                                             class="img-fluid h-100 w-100" 
+                                             alt="{{ item.product.name }}" 
+                                             style="object-fit: cover; min-height: 150px;">
+                                    {% else %}
+                                        <div class="bg-secondary d-flex align-items-center justify-content-center h-100" style="min-height: 150px;">
+                                            <span class="text-white">Нет фото</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Информация о товаре -->
+                                <div class="col-md-9">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <!-- Левая часть: чек-бокс и название -->
+                                            <div class="flex-grow-1">
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" 
+                                                           type="checkbox" 
+                                                           name="selected_products" 
+                                                           value="{{ item.product.id }}"
+                                                           id="product_{{ item.product.id }}"
+                                                           {% if item.is_selected %}checked{% endif %}
+                                                           style="cursor: pointer; transform: scale(1.1);">
+                                                    <label class="form-check-label fw-bold" 
+                                                           for="product_{{ item.product.id }}" 
+                                                           style="color: #dc3545; cursor: pointer;">
+                                                        {{ item.product.name }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Правая часть: кнопки -->
+                                            <div class="d-flex gap-2 align-items-start">
+                                                <!-- Кнопка удаления из корзины -->
+                                                <form method="post" action="{% url 'product:toggle_shopping_cart' item.product.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            title="Удалить из корзины" 
+                                                            style="width: 36px; height: 36px; padding: 0; border-radius: 8px;">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                                
+                                                <!-- Кнопка избранного -->
+                                                <form method="post" action="{% url 'product:toggle_favorite' item.product.id %}">
+                                                    {% csrf_token %}
+                                                    {% if item.product.id in favorite_ids %}
+                                                        <button type="submit" class="btn btn-sm btn-danger" 
+                                                                title="Удалить из избранного" 
+                                                                style="width: 36px; height: 36px; padding: 0; border-radius: 8px;">
+                                                            <i class="fas fa-heart"></i>
+                                                        </button>
+                                                    {% else %}
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                                title="Добавить в избранное" 
+                                                                style="width: 36px; height: 36px; padding: 0; border-radius: 8px;">
+                                                            <i class="fas fa-heart"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                </form>
+                                            </div>
+                                        </div>  <!-- Закрывает d-flex justify-content-between -->
+                                        
+                                        <!-- Цена (с учётом акции) -->
+                                        {% if item.product.is_sale %}
+                                            <strike style="color: #6c757d; font-size: 0.9rem;">{{ item.product.price }} ₽</strike>
+                                            <h4 style="color: #28a745; margin: 10px 0;">{{ item.product.sale_price }} ₽</h4>
+                                        {% else %}
+                                            <h4 style="color: #28a745; margin: 10px 0;">{{ item.product.price }} ₽</h4>
+                                        {% endif %}
+                                        
+                                        <!-- Кнопка "Подробнее" -->
+                                        <a href="{% url 'product:product_detail' item.product.id %}" 
+                                           class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-info-circle me-1"></i>Подробнее
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Блок ИТОГО -->
+                <div class="col-lg-4">
+                    <div class="card text-center shadow-sm" style="background-color: #ffffff; border: none; border-radius: 20px; position: sticky; top: 20px;">
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <span style="font-size: 14px; color: #6c757d; letter-spacing: 2px;">ИТОГО</span>
+                                <h2 style="color: #dc3545; margin: 10px 0 5px; font-weight: bold;">{{ total_price }} ₽</h2>
+                                <small class="text-muted">включая все налоги</small>
+                            </div>
+                            
+                            <div class="border-top pt-3 mb-3" style="border-color: #e9ecef;">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>Всего товаров:</span>
+                                    <strong>{{ shopping_carts|length }}</strong>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Выбрано:</span>
+                                    <strong style="color: #28a745;">{{ selected_count }}</strong>
+                                </div>
+                            </div>
+                            
+                            <!-- Кнопка сохранения изменений -->
+                            <button type="submit" class="btn btn-primary w-100 py-2 mb-2" style="font-weight: bold; border-radius: 50px;">
+                                <i class="fas fa-save me-2"></i>Сохранить выбор
+                            </button>
+                            
+                            <!-- Кнопка оформления заказа -->
+                            <button class="btn btn-danger w-100 py-2" disabled style="font-weight: bold; border-radius: 50px;">
+                                <i class="fas fa-credit-card me-2"></i>Оформить заказ
+                            </button>
+                            
+                            <small class="text-muted d-block text-center mt-3">
+                                <i class="fas fa-lock me-1"></i>Безопасная оплата
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Кнопка удаления всех выбранных товаров -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <form method="post" action="{% url 'product:remove_selected' %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger" 
+                            onclick="return confirm('Удалить выбранные товары из корзины?')">
+                        <i class="fas fa-trash-alt me-2"></i>Удалить выбранные товары
+                    </button>
+                </form>
+            </div>
         </div>
-      </div>
+        
     {% else %}
-      <div class="text-center py-5">
-        <i class="fas fa-shopping-cart" style="font-size: 64px; color: #dc3545; opacity: 0.5;"></i>
-        <p class="mt-3 text-muted">Ваша корзина пуста</p>
-        <a href="{% url 'product:index' %}" class="btn btn-outline-danger mt-2">
-          <i class="fas fa-store me-1"></i>Перейти к покупкам
-        </a>
-      </div>
+        <!-- Пустая корзина -->
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart" style="font-size: 64px; color: #dc3545; opacity: 0.5;"></i>
+            <p class="mt-3 text-muted">Ваша корзина пуста</p>
+            <a href="{% url 'product:index' %}" class="btn btn-outline-danger mt-2">
+                <i class="fas fa-store me-1"></i>Перейти к покупкам
+            </a>
+        </div>
     {% endif %}
-  </div>
+</div>
 {% endblock %}

@@ -60,7 +60,7 @@ class ShoppingCartFavoriteMixin:
 
 
 class ShoppingCartFavoriteListMixin:
-    """Миксин для отображения избранного/корзины пользователя."""
+    """Миксин для получения избранного/корзины пользователя."""
 
     def get_queryset(self, model=None):
         return model.objects.filter(
@@ -165,7 +165,9 @@ class ReviewCreateView(AuthRequiredMixin, CreateView):
             author=self.request.user, product=self.product
         ).exists():
             messages.warning(request, 'Вы уже оставили отзыв на этот товар.')
-            return redirect('product:product_detail', product_id=self.product.id)
+            return redirect(
+                'product:product_detail', product_id=self.product.id
+            )
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -177,7 +179,9 @@ class ReviewCreateView(AuthRequiredMixin, CreateView):
         except IntegrityError:
             messages.error(
                 self.request, 'Вы уже оставили отзыв на этот товар.')
-            return redirect('product:product_detail', product_id=self.product.id)
+            return redirect(
+                'product:product_detail', product_id=self.product.id
+            )
         return redirect('product:product_detail', product_id=self.product.id)
 
 
@@ -259,7 +263,10 @@ class FavoriteListView(
         return super().get_queryset(Favorite)
 
 
-class ShoppingCartListView(AuthRequiredMixin, ShoppingCartFavoriteListMixin, FavoriteCartContextMixin, ListView):
+class ShoppingCartListView(
+    AuthRequiredMixin, ShoppingCartFavoriteListMixin,
+    FavoriteCartContextMixin, ListView
+):
     """Представление для всех товаров добавленных в корзину пользователем."""
 
     model = ShoppingCart
@@ -271,11 +278,40 @@ class ShoppingCartListView(AuthRequiredMixin, ShoppingCartFavoriteListMixin, Fav
 
     def get_context_data(self, **kwargs):
         cart_items = self.get_queryset()
+        selected_items = [item for item in cart_items if item.is_selected]
         return super().get_context_data(
             **kwargs,
             total_price=sum(
                 item.product.price
                 if not item.product.is_sale else item.product.sale_price
-                for item in cart_items
-            )
+                for item in selected_items
+            ),
+            selected_count=len(selected_items),
         )
+
+
+class UpdateCartSelectionView(AuthRequiredMixin, View):
+    """Представления для добавления товаров для оформления заказа."""
+
+    def post(self, request):
+        selected_products = request.POST.getlist('selected_products')
+        selected_products = [int(p_id) for p_id in selected_products]
+        cart_items = ShoppingCart.objects.filter(user=request.user)
+        for item in cart_items:
+            if item.product.id in selected_products:
+                item.is_selected = True
+            else:
+                item.is_selected = False
+            item.save(update_fields=['is_selected'])
+        return redirect('product:shopping_cart')
+
+
+class RemoveSelectedCartView(AuthRequiredMixin, View):
+    """Представлние для удаления выбранных товаров."""
+
+    def pos(self, request):
+        ShoppingCart.objects.filter(
+            user=request.user,
+            is_selected=True
+        ).delete()
+        return redirect('product:shopping_cart')

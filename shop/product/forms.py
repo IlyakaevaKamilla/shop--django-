@@ -10,13 +10,6 @@ class ReviewForm(forms.ModelForm):
         fields = ('text',)
 
 
-# class ShoppingCartForm(forms.ModelForm):
-
-#     class Meta:
-#         model = ShoppingCart
-#         fields = ('is_selected',)
-
-
 class ProfileForm(forms.ModelForm):
 
     class Meta:

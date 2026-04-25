@@ -26,5 +26,9 @@ urlpatterns = [
     path('favorites/', views.FavoriteListView.as_view(), name='favoriites'),
     path('shopping-cart/',
          views.ShoppingCartListView.as_view(), name='shopping_cart'),
+    path('shopping-cart/update-selection',
+         views.UpdateCartSelectionView.as_view(), name='update_selection'),
+    path('shopping-cart/delete-selection',
+         views.RemoveSelectedCartView.as_view(), name='remove_selected'),
     path('', views.IndexView.as_view(), name='index'),
 ]
