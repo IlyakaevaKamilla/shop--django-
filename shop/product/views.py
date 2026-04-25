@@ -68,16 +68,21 @@ class ShoppingCartFavoriteListMixin:
         ).select_related('product')
 
 
-class FavoriteContextMixin:
-    """Миксин для добавления избранного в контекст."""
+class FavoriteCartContextMixin:
+    """Миксин для добавления избранного/корзины в контекст."""
+
+    def get_items(self, model):
+        return model.objects.filter(
+                user=self.request.user,
+            ).values_list('product_id', flat=True)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated:
-            favorites_ids = Favorite.objects.filter(
-                user=self.request.user,
-            ).values_list('product_id', flat=True)
+            favorites_ids = self.get_items(Favorite)
             context['favorite_ids'] = set(favorites_ids)
+            cart_ids = self.get_items(ShoppingCart)
+            context['cart_ids'] = set(cart_ids)
         return context
 
 
@@ -92,7 +97,7 @@ class IndexView(ListView):
         return Category.objects.filter(is_published=True)
 
 
-class CategoryListView(FavoriteContextMixin, ListView):
+class CategoryListView(FavoriteCartContextMixin, ListView):
     """Представление товаров этой категории."""
 
     model = Product
@@ -124,7 +129,7 @@ class CategoryListView(FavoriteContextMixin, ListView):
         return super().get_context_data(**kwargs, category=self._category)
 
 
-class ProductDetail(FavoriteContextMixin, DetailView):
+class ProductDetail(FavoriteCartContextMixin, DetailView):
     """Представление отдельного товара."""
 
     model = Product
@@ -242,7 +247,7 @@ class ToggleShoppingCartView(ShoppingCartFavoriteMixin, View):
 
 class FavoriteListView(
     AuthRequiredMixin, ShoppingCartFavoriteListMixin,
-    FavoriteContextMixin, ListView
+    FavoriteCartContextMixin, ListView
 ):
     """Представление для всех избранных товаров пользователя."""
 
@@ -254,7 +259,7 @@ class FavoriteListView(
         return super().get_queryset(Favorite)
 
 
-class ShoppingCartListView(AuthRequiredMixin, ShoppingCartFavoriteListMixin, ListView):
+class ShoppingCartListView(AuthRequiredMixin, ShoppingCartFavoriteListMixin, FavoriteCartContextMixin, ListView):
     """Представление для всех товаров добавленных в корзину пользователем."""
 
     model = ShoppingCart
@@ -268,6 +273,5 @@ class ShoppingCartListView(AuthRequiredMixin, ShoppingCartFavoriteListMixin, Lis
         cart_items = self.get_queryset()
         return super().get_context_data(
             **kwargs,
-            total_price=sum(item.product.price for item in cart_items),
-            cart_ids=cart_items.values_list('product_id', flat=True)
+            total_price=sum(item.product.price for item in cart_items)
         )
