@@ -5,11 +5,11 @@
     <form method="post" action="{% url 'product:toggle_favorite' product.id %}" class="d-inline">
       {% csrf_token %}
       {% if product.id in favorite_ids %}
-        <button type="submit" class="btn btn-danger" title="Удалить из избранного">
+        <button type="submit" class="btn btn-danger {% if not product.in_stock %}disabled{% endif %}" title="Удалить из избранного">
           <i class="fas fa-heart me-1"></i>
         </button>
       {% else %}
-        <button type="submit" class="btn btn-outline-danger" title="Добавить в избранное">
+        <button type="submit" class="btn btn-outline-danger {% if not product.in_stock %}disabled{% endif %}" title="Добавить в избранное">
           <i class="fas fa-heart me-1"></i>
         </button>
       {% endif %}
@@ -18,11 +18,11 @@
     <form method="post" action="{% url 'product:toggle_shopping_cart' product.id %}" class="d-inline">
       {% csrf_token %}
       {% if product.id in cart_ids %}
-        <button type="submit" class="btn btn-success" title="Удалить из корзины">
+        <button type="submit" class="btn btn-success {% if not product.in_stock %}disabled{% endif %}" title="Удалить из корзины">
           <i class="fas fa-shopping-cart me-1"></i>
         </button>
       {% else %}
-        <button type="submit" class="btn btn-outline-success" title="Добавить в корзину">
+        <button type="submit" class="btn btn-outline-success {% if not product.in_stock %}disabled{% endif %}" title="Добавить в корзину">
           <i class="fas fa-shopping-cart me-1"></i>
         </button>
       {% endif %}

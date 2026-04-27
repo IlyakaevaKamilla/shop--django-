@@ -26,6 +26,8 @@ urlpatterns = [
     path('favorites/', views.FavoriteListView.as_view(), name='favoriites'),
     path('shopping-cart/',
          views.ShoppingCartListView.as_view(), name='shopping_cart'),
+    path('shopping-cart/update/<int:product_id>/',
+         views.QuantityProductUpdate.as_view(), name='update_quantity'),
     path('shopping-cart/update-selection',
          views.UpdateCartSelectionView.as_view(), name='update_selection'),
     path('shopping-cart/delete-selection',

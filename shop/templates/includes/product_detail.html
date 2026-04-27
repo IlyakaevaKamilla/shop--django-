@@ -1,11 +1,24 @@
 {% load static %}
 <div class="col">
-  <div class="card h-100 shadow-sm">
-    <a href="{% url 'product:product_detail' product.id %}">
-      <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-    </a>
+  <div class="card h-100 shadow-sm {% if not product.in_stock %}opacity-50{% endif %}">
+    {% if product.in_stock %}
+      <a href="{% url 'product:product_detail' product.id %}">
+    {% else %}
+      <div class="out-of-stock-overlay">
+    {% endif %}
+    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+    {% if product.in_stock %}
+      </a>
+    {% else %}
+      </div>
+    {% endif %}
     <div class="card-body">
-      <h5 class="card-title">{{ product.name }}</h5>
+      <h5 class="card-title {% if not product.in_stock %}text-muted{% endif %}">
+        {{ product.name }}
+        {% if not product.in_stock %}
+          <span class="badge bg-secondary ms-2">Нет в наличии</span>
+        {% endif %}
+      </h5>
       {% if product.is_sale %}
         <strike>{{ product.price }} ₽</strike>
         <p class="card-text fw-bold" style="color: #dc3545;">{{ product.sale_price }} ₽</p>
@@ -17,12 +30,12 @@
       </div>
       {% if show_delete_button %}
         <div class="mt-2">
-            <form method="post" action="{% url delete_url product.id %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-sm btn-danger w-100">
-                    <i class="fas fa-trash-alt me-1"></i> Удалить
-                </button>
-            </form>
+          <form method="post" action="{% url delete_url product.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-danger w-100 {% if not product.in_stock %}disabled{% endif %}">
+              <i class="fas fa-trash-alt me-1"></i> Удалить
+            </button>
+          </form>
         </div>
       {% endif %}
     </div>

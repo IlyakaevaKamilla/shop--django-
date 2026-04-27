@@ -10,6 +10,16 @@
             Товар: <a href="{% url 'product:product_detail' review.product.id %}">{{ review.product.name }}</a>
           </small>
         {% endif %}
+        <!-- CSS звёздочки для отзыва -->
+        <div class="stars-static mb-2">
+          {% for i in "12345"|make_list %}
+            {% if forloop.counter <= review.rating %}
+              <i class="fas fa-star star-filled"></i>
+            {% else %}
+              <i class="far fa-star star-empty"></i>
+            {% endif %}
+          {% endfor %}
+        </div>
         <div><small class="text-muted">{{ review.created_at|date:"d.m.Y H:i" }}</small></div>
       </div>
     </div>

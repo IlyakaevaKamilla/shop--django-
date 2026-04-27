@@ -7,7 +7,7 @@ class ReviewForm(forms.ModelForm):
 
     class Meta:
         model = Review
-        fields = ('text',)
+        fields = ('text', 'rating')
 
 
 class ProfileForm(forms.ModelForm):

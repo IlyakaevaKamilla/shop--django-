@@ -1,16 +1,19 @@
 from django.db import models
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator
+
+RATING_CHOICES = [
+    (1, '1 - Ужасно'),
+    (2, '2 - Плохо'),
+    (3, '3 - Нормально'),
+    (4, '4 - Хорошо'),
+    (5, '5 - Отлично'),
+]
 
 
 class PublishedModel(models.Model):
-    """Абстрактная модель. Добвляет флаг is_published, created_at."""
+    """Абстрактная модель. Добвляет флаг created_at."""
 
-    is_published = models.BooleanField(
-        default=True,
-        verbose_name='Опубликовано',
-        help_text='Снимите галочку, чтобы скрыть публикацию.'
-    )
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name='Добавлено')
 
@@ -24,6 +27,11 @@ User = get_user_model()
 class Category(PublishedModel):
     """Категории."""
 
+    is_published = models.BooleanField(
+        default=True,
+        verbose_name='Опубликовано',
+        help_text='Снимите галочку, чтобы скрыть публикацию.'
+    )
     name = models.CharField('Название', max_length=256)
     slug = models.SlugField(
         'Идентификатор',
@@ -54,18 +62,23 @@ class Product(PublishedModel):
         'Материал', max_length=256, null=True, blank=True
     )
     image = models.ImageField('Картинка', upload_to='good_image')
+    category = models.ForeignKey(
+        Category, verbose_name='Категория',
+        on_delete=models.CASCADE, related_name='category'
+    )
+    in_stock = models.BooleanField(
+        'В наличии', default=True,
+        help_text='Снимите галочку, если товар закончился'
+    )
+    max_quantity = models.IntegerField('Кол-во товара', default=1)
     is_sale = models.BooleanField('На распродаже', default=False)
     sale_price = models.IntegerField(
         'Цена со скидкой', validators=[MinValueValidator(0)],
         null=True, blank=True
     )
-    category = models.ForeignKey(
-        Category, verbose_name='Категория',
-        on_delete=models.CASCADE, related_name='category'
-    )
 
     class Meta:
-        ordering = ('name',)
+        ordering = ('-created_at',)
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
 
@@ -86,7 +99,7 @@ class Review(models.Model):
         User, verbose_name='Автор',
         on_delete=models.CASCADE, related_name='reviews'
     )
-    # можно попробовать добавить оценку (от 1 до 5)
+    rating = models.IntegerField('Оценка', choices=RATING_CHOICES, default=5)
 
     class Meta:
         ordering = ('-created_at',)
@@ -103,24 +116,26 @@ class Review(models.Model):
         return f'Отзыв от {self.author.username} на {self.product.name}'
 
 
-class ProductUser(models.Model):
-    """Абстрактная модель связ товар-пользователь."""
+class Favorite(models.Model):
+    """Избранное."""
 
     user = models.ForeignKey(
         User, verbose_name='Автор',
-        on_delete=models.CASCADE, related_name='%(class)ss'
+        on_delete=models.CASCADE, related_name='favorites'
     )
     product = models.ForeignKey(
         Product, verbose_name='Товар',
-        on_delete=models.CASCADE, related_name='%(class)ss'
+        on_delete=models.CASCADE, related_name='favorites'
     )
 
     class Meta:
-        abstract = True
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        ordering = ('user',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'product'],
-                name='unique_%(class)s'
+                name='unique_favorites'
             )
         ]
 
@@ -128,19 +143,54 @@ class ProductUser(models.Model):
         return f'{self.user} - {self.product}'
 
 
-class Favorite(ProductUser):
-    """Избранное."""
-
-    class Meta(ProductUser.Meta):
-        verbose_name = 'Избранное'
-        verbose_name_plural = 'Избранные'
-
-
-class ShoppingCart(ProductUser):
+class ShoppingCart(models.Model):
     """Корзина покупок."""
 
-    is_selected = models.BooleanField('Купить', default=True)
+    user = models.ForeignKey(
+        User, verbose_name='Автор',
+        on_delete=models.CASCADE, related_name='carts'
+    )
+    products = models.ManyToManyField(
+        Product, through='CartProduct',
+        verbose_name='Товары', related_name='carts'
+    )
 
-    class Meta(ProductUser.Meta):
+    class Meta:
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзины'
+        ordering = ('user',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user'],
+                name='unique_user_cart'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} - {self.products}'
+
+
+class CartProduct(models.Model):
+    """Корзина пользователя с кол-вом товаров."""
+
+    cart = models.ForeignKey(
+        ShoppingCart, on_delete=models.CASCADE,
+        related_name='cart_products', verbose_name='Корзина'
+    )
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE,
+        related_name='cart_products', verbose_name='Товар'
+    )
+    quantity = models.IntegerField(
+        'Количество', validators=[MinValueValidator(1),], default=1
+    )
+    is_selected = models.BooleanField('Купить', default=True)
+
+    class Meta:
+        verbose_name = 'Корзина с количеством'
+        verbose_name_plural = 'Корзины с количеством'
+        unique_together = ('cart', 'product')
+
+    def __str__(self):
+        return (f'{self.cart.user.username} - '
+                f'{self.product.name}, {self.quantity} шт.')
