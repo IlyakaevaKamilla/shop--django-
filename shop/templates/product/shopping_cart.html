@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}
     Корзина
@@ -27,10 +28,16 @@
               <div class="row g-0">
                 <!-- Картинка -->
                 <div class="col-md-3">
-                  <img src="{{ item.product.image.url }}" 
-                        class="img-fluid h-100 w-100" 
-                        alt="{{ item.product.name }}" 
-                        style="object-fit: cover; min-height: 150px;">
+                  {% with first_image=item.product.images.first %}
+                    {% if first_image %}
+                      <img src="{{ first_image.image.url }}" 
+                            class="img-fluid h-100 w-100" 
+                            alt="{{ item.product.name }}" 
+                            style="object-fit: cover; min-height: 150px;">
+                    {% else %}
+                      <img src="{% static 'images/no_image.jpg' %}" class="card-img-top" alt="Нет фото" style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                  {% endwith %}
                 </div>
                 <!-- Информация о товаре -->
                 <div class="col-md-9">

@@ -2,7 +2,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 
-from .models import Product, Review, Favorite, ShoppingCart, CartProduct
+from .models import CartProduct, Favorite, Product, Review, ShoppingCart
 
 
 class AuthRequiredMixin(LoginRequiredMixin):

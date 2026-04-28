@@ -1,6 +1,6 @@
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
+from django.db import models
 
 RATING_CHOICES = [
     (1, '1 - Ужасно'),
@@ -61,7 +61,6 @@ class Product(PublishedModel):
     material = models.CharField(
         'Материал', max_length=256, null=True, blank=True
     )
-    image = models.ImageField('Картинка', upload_to='good_image')
     category = models.ForeignKey(
         Category, verbose_name='Категория',
         on_delete=models.CASCADE, related_name='category'
@@ -84,6 +83,23 @@ class Product(PublishedModel):
 
     def __str__(self):
         return self.name[:15]
+
+
+class Gallery(PublishedModel):
+    image = models.ImageField(
+        'Картинка', upload_to='good_image', null=False, blank=False
+    )
+    product = models.ForeignKey(
+        Product, verbose_name='Товар',
+        on_delete=models.CASCADE, related_name='images')
+
+    class Meta:
+        ordering = ('-created_at',)
+        verbose_name = 'Изображение'
+        verbose_name_plural = 'Изображения'
+
+    def __str__(self):
+        return f'для {self.product.name}'
 
 
 class Review(models.Model):

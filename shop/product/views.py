@@ -1,21 +1,27 @@
-from django.conf import settings
 from django.contrib import messages
 from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
-    CreateView, DeleteView, DetailView, ListView, UpdateView, View
+    CreateView,
+    DeleteView,
+    DetailView,
+    ListView,
+    UpdateView,
+    View,
 )
 
-from .forms import ReviewForm, ProfileForm
-from .models import (
-    Category, User, Product, Review, Favorite, ShoppingCart, CartProduct
-)
+from .forms import ProfileForm, ReviewForm
 from .mixins import (
-    AuthRequiredMixin, OnlyAuthorMixin, ReviewCRUDMixin,
-    ShoppingCartFavoriteMixin, FavoriteMixin,
-    FavoriteCartContextMixin, CartMixin
+    AuthRequiredMixin,
+    CartMixin,
+    FavoriteCartContextMixin,
+    FavoriteMixin,
+    OnlyAuthorMixin,
+    ReviewCRUDMixin,
+    ShoppingCartFavoriteMixin,
 )
+from .models import CartProduct, Category, Favorite, Product, Review, User
 
 
 class IndexView(ListView):

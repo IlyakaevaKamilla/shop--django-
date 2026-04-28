@@ -6,7 +6,13 @@
     {% else %}
       <div class="out-of-stock-overlay">
     {% endif %}
-    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+    {% with first_image=product.images.first %}
+      {% if first_image %}
+        <img src="{{ first_image.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+      {% else %}
+        <img src="{% static 'images/no_image.jpg' %}" class="card-img-top" alt="Нет фото" style="height: 200px; object-fit: cover;">
+      {% endif %}
+    {% endwith %}
     {% if product.in_stock %}
       </a>
     {% else %}
