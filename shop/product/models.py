@@ -86,6 +86,8 @@ class Product(PublishedModel):
 
 
 class Gallery(PublishedModel):
+    """Изображения."""
+
     image = models.ImageField(
         'Картинка', upload_to='good_image', null=False, blank=False
     )
