@@ -106,6 +106,7 @@ LOGIN_REDIRECT_URL = 'product:index'
 
 LOGIN_URL = 'login'
 
+PRODUCTS_PER_PAGE = 12
 
 MESSAGE_TAGS = {
     messages.DEBUG: 'secondary',

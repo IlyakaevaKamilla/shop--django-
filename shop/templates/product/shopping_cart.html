@@ -138,6 +138,7 @@
                           </div>
                         {% endif %}
                       </div>
+                      <small class="text-muted">Осталось {{ item.product.max_quantity }} шт.</small><br>
                       <!-- Итоговая цена за этот товар -->
                       <div style="text-align: right;">
                         {% if item.product.is_sale %}
@@ -179,10 +180,6 @@
                   <strong style="color: #28a745;">{{ selected_count }}</strong>
                 </div>
               </div>
-              <!-- Кнопка сохранения изменений -->
-              <button type="submit" class="btn btn-primary w-100 py-2 mb-2" style="font-weight: bold; border-radius: 50px;">
-                <i class="fas fa-save me-2"></i>Сохранить выбор
-              </button>
               <!-- Кнопка оформления заказа -->
               <button class="btn btn-danger w-100 py-2" disabled style="font-weight: bold; border-radius: 50px;">
                 <i class="fas fa-credit-card me-2"></i>Оформить заказ

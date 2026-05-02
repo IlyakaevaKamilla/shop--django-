@@ -1,5 +1,5 @@
-from django.contrib import messages
 from django.db import IntegrityError
+from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
@@ -39,6 +39,7 @@ class CategoryListView(FavoriteCartContextMixin, ListView):
     """Представление товаров этой категории."""
 
     model = Product
+    paginate_by = settings.PRODUCTS_PER_PAGE
     template_name = 'product/category.html'
     context_object_name = 'products'
 
@@ -66,7 +67,7 @@ class CategoryListView(FavoriteCartContextMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['category'] = self._category
-        for product in context['products']:
+        for product in context['products']:  # не работает
             reviews = product.reviews.all()
             if reviews:
                 product.average_rating = sum(
@@ -118,10 +119,9 @@ class ReviewCreateView(AuthRequiredMixin, CreateView):
         if Review.objects.filter(
             author=self.request.user, product=self.product
         ).exists():
-            messages.warning(request, 'Вы уже оставили отзыв на этот товар.')
             return redirect(
                 'product:product_detail', product_id=self.product.id
-            )
+            )  # 136 и 139 одинаковые
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
@@ -129,10 +129,7 @@ class ReviewCreateView(AuthRequiredMixin, CreateView):
             form.instance.author = self.request.user
             form.instance.product = self.product
             form.save()
-            messages.success(self.request, 'Спасибо за ваш отзыв!')
         except IntegrityError:
-            messages.error(
-                self.request, 'Вы уже оставили отзыв на этот товар.')
             return redirect(
                 'product:product_detail', product_id=self.product.id
             )
