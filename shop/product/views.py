@@ -9,9 +9,11 @@ from django.views.generic import (
     ListView,
     UpdateView,
     View,
+    FormView,
+    TemplateView
 )
 
-from .forms import ProfileForm, ReviewForm
+from .forms import ProfileForm, ReviewForm, OrderForm
 from .mixins import (
     AuthRequiredMixin,
     CartMixin,
@@ -21,7 +23,8 @@ from .mixins import (
     ReviewCRUDMixin,
     ShoppingCartFavoriteMixin,
 )
-from .models import CartProduct, Category, Favorite, Product, Review, User
+from .models import CartProduct, Category, Favorite, Product, Review, User, Order
+from .utils.send_email import send_email_admin
 
 
 class IndexView(ListView):
@@ -294,3 +297,72 @@ class QuantityProductUpdate(AuthRequiredMixin, CartMixin, View):
                 cart_item.save()
 
         return redirect('product:shopping_cart')
+
+
+class PlaceOrder(AuthRequiredMixin, CartMixin, FormView):
+    """Представления для оформления заказа."""
+
+    form_class = OrderForm
+    template_name = 'product/orders.html'
+    success_url = reverse_lazy('product:order_success')
+
+    def get_initial(self):
+        user = self.request.user
+        return {
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': getattr(user, 'email', ''),
+            'phone': getattr(user, 'phone', ''),
+        }
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        cart_products = self.get_cart_products()
+        selected_items = [item for item in cart_products if item.is_selected]
+        total_price = sum(
+            item.product.price
+            if not item.product.is_sale else item.product.sale_price
+            * item.quantity
+            for item in selected_items
+        )
+        context['selected_items'] = selected_items
+        context['total_price'] = total_price
+        return context
+
+    def form_valid(self, form):
+        cart_products = self.get_cart_products()
+        selected_items = [item for item in cart_products if item.is_selected]
+        total_price = sum(
+            item.product.price
+            if not item.product.is_sale else item.product.sale_price
+            * item.quantity
+            for item in selected_items
+        )
+        order = Order.objects.create(
+            user=self.request.user,
+            email=form.cleaned_data.get('email', ''),
+            first_name=form.cleaned_data['first_name'],
+            last_name=form.cleaned_data['last_name'],
+            phone=form.cleaned_data['phone'],
+            total_price=total_price
+        )
+        if order:
+            for product in cart_products:
+                product_db = Product.objects.get(id=product.product.id)
+                product_db.max_quantity = product_db.max_quantity - product.quantity
+                if product_db.max_quantity == 0:
+                    product_db.in_stock = False
+                product_db.save()
+            send_email_admin(order, selected_items)
+        for item in selected_items:
+            item.delete()
+        cart = self.get_user_cart()
+        if cart and not self.get_cart_products().exists():
+            cart.delete()
+        return super().form_valid(form)
+
+
+class OrderSuccess(TemplateView):
+    """Представление после удачного оформления заказа."""
+
+    template_name = 'product/order_success.html'

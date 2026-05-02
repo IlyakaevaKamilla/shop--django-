@@ -38,9 +38,11 @@ class CartMixin:
     """Миксин для получения корзины пользователя."""
 
     def get_user_cart(self):
+        """Корзина пользователя."""
         return ShoppingCart.objects.filter(user=self.request.user).first()
 
     def get_cart_products(self):
+        """Корзина пользователя с товарами."""
         cart = self.get_user_cart()
         if cart:
             return CartProduct.objects.filter(
@@ -49,6 +51,7 @@ class CartMixin:
         return CartProduct.objects.none()
 
     def get_cart_product_ids(self):
+        """id товаров."""
         return self.get_cart_products().values_list('product_id', flat=True)
 
 
@@ -56,11 +59,13 @@ class FavoriteMixin:
     """Миксин для работы с избранным."""
 
     def get_favorites(self):
+        """Избранное пользователя."""
         return Favorite.objects.filter(
             user=self.request.user
         ).select_related('product')
 
     def get_favorite_ids(self):
+        """id избранного."""
         return self.get_favorites().values_list('product_id', flat=True)
 
 

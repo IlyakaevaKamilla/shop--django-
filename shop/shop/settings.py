@@ -3,6 +3,10 @@ from pathlib import Path
 
 from django.contrib.messages import constants as messages
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -115,3 +119,14 @@ MESSAGE_TAGS = {
     messages.WARNING: 'warning',
     messages.ERROR: 'danger',
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_PORT = 2525
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'ilyakaeva_kamilla@mail.ru'
+EMAIL_HOST_PASSWORD = 'tZXO5cmH4FlQanuBThgk'
+DEFAULT_FROM_EMAIL = 'ilyakaeva_kamilla@mail.ru'
+SERVER_EMAIL = 'ilyakaeva_kamilla@mail.ru'

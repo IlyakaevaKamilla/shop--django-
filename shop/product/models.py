@@ -10,6 +10,13 @@ RATING_CHOICES = [
     (5, '5 - Отлично'),
 ]
 
+ORDER_STATUS_CHOICES = [
+    ('pending', 'Ожидает обработки'),
+    ('paid', 'Оплачен'),
+    ('shipped', 'Доставлен'),
+    ('cancelled', 'Отменен'),
+]
+
 
 class PublishedModel(models.Model):
     """Абстрактная модель. Добвляет флаг created_at."""
@@ -210,5 +217,31 @@ class CartProduct(models.Model):
         unique_together = ('cart', 'product')
 
     def __str__(self):
-        return (f'{self.cart.user.username} - '
-                f'{self.product.name}, {self.quantity} шт.')
+        return (f'{self.product.name}, {self.quantity} шт.')
+
+
+class Order(PublishedModel):
+    """Заказы."""
+
+    user = models.ForeignKey(
+        User, verbose_name='Пользователь',
+        on_delete=models.CASCADE, related_name='orders'
+    )
+    email = models.EmailField('Email', max_length=254, blank=True)
+    first_name = models.CharField('Имя', max_length=50)
+    last_name = models.CharField('Фамилия', max_length=50)
+    phone = models.CharField('Номер телефона', max_length=20)
+    address = models.CharField('Адрес', max_length=254)  # для будущего
+    total_price = models.IntegerField('Итоговая сумма')
+    status = models.CharField(
+        'Статус', max_length=50,
+        choices=ORDER_STATUS_CHOICES, default='pending'
+    )
+
+    class Meta:
+        verbose_name = 'Заказ'
+        verbose_name_plural = 'Заказы'
+        ordering = ('-created_at',)
+
+    def __str__(self):
+        return f'Заказ №{self.id} от {self.user.username}'

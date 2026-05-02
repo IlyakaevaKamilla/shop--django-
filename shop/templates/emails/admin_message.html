@@ -1,0 +1,16 @@
+Был создан заказ от {{ created_at }} №{{ order_id }}.
+<br>
+Товары в заказе:
+{% for product in selected_items %}
+  <ul>
+    <li>{{ product }}</li>
+  </ul>
+{% endfor %}
+На сумму {{ total_price }}₽
+<br><br>
+Данные покупателя:
+<ul>
+  <li>Имя Фамилия: {{ first_name }} {{ last_name }}</li>
+  <li>Email: {{ email }}</li>
+  <li>Номер телефона: {{ phone }}</li>
+</ul>

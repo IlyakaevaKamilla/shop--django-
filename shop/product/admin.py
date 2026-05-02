@@ -6,6 +6,7 @@ from .models import (
     Gallery,
     Product,
     Review,
+    Order
 )
 
 
@@ -52,3 +53,15 @@ class CategoryAdmin(admin.ModelAdmin):
         if category.image:
             return (f"<img src='{category.image.url}'"
                     "width='150' style='object-fit: cover;'>")
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = (
+        'user', 'first_last_name', 'email', 'phone', 'total_price', 'status'
+    )
+    list_editable = ('status',)
+
+    @admin.display(description='Фамилия Имя')
+    def first_last_name(self, user):
+        return f'{user.last_name} {user.first_name}'
