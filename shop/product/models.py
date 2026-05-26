@@ -11,9 +11,10 @@ RATING_CHOICES = [
 ]
 
 ORDER_STATUS_CHOICES = [
-    ('pending', 'Ожидает обработки'),
     ('paid', 'Оплачен'),
-    ('shipped', 'Доставлен'),
+    ('collecting', 'Собирается на складе'),
+    ('pick_up', 'Можно забирать'),
+    ('shipped', 'Доставлен'),  # на будущее (доставка)
     ('cancelled', 'Отменен'),
 ]
 
@@ -235,7 +236,7 @@ class Order(PublishedModel):
     total_price = models.IntegerField('Итоговая сумма')
     status = models.CharField(
         'Статус', max_length=50,
-        choices=ORDER_STATUS_CHOICES, default='pending'
+        choices=ORDER_STATUS_CHOICES, default='paid'
     )
 
     class Meta:

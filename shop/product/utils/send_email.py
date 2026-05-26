@@ -7,7 +7,7 @@ admin = User.objects.get(is_staff=True)
 
 
 def send_email_admin(order, selected_items):
-    html_content = render_to_string(
+    html_content_admin = render_to_string(
         'emails/admin_message.html',
         context={
             'created_at': order.created_at,
@@ -20,10 +20,32 @@ def send_email_admin(order, selected_items):
             'phone': order.phone
         },
     )
-    message = EmailMultiAlternatives(
+    html_content_user = render_to_string(
+        'emails/user_message.html',
+        context={
+            'created_at': order.created_at,
+            'first_name': order.first_name,
+            'last_name': order.last_name,
+            'total_price': order.total_price,
+            'status': order.get_status_display(),
+        }
+    )
+    message_to_admin = EmailMultiAlternatives(
         subject=f'Новый заказ №{order.id}',
         body='',
         to=[admin.email],
     )
-    message.attach_alternative(html_content, 'text/html')
-    message.send()
+    message_to_admin.attach_alternative(html_content_admin, 'text/html')
+    message_to_admin.send()
+
+    try:
+        user_email = order.user.email if order.user.email else order.email
+        message_to_user = EmailMultiAlternatives(
+            subject='Спасибо за заказ!',
+            body='',
+            to=[user_email],
+        )
+        message_to_user.attach_alternative(html_content_user, 'text/html')
+        message_to_user.send()
+    except Exception as e:
+        print('Ошибка при отправке письма пользователю', str(e))
