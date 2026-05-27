@@ -105,6 +105,8 @@ GitHub: [@IlyakaevaKamilla](https://github.com/IlyakaevaKamilla)
 
 Email: [ilyakaeva_kamilla@mail.ru](mailto:ilyakaeva_kamilla@mail.ru)
 
+Telegram: [@kukuru0](https://t.me/kukuru0)
+
 ---
 
 *Проект создан при поддержке AI-ассистента, который помог с frontend-разработкой 
